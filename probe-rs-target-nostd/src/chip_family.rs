@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// This is used for diagnostics, when
 /// an error related to a target description occurs.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, defmt::Format)]
 pub enum TargetDescriptionSource {
     /// The target description is a generic target description,
     /// which just describes a core type (e.g. M4), without any
@@ -25,7 +25,9 @@ pub enum TargetDescriptionSource {
 }
 
 /// Type of a supported core.
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, Ord, PartialOrd)]
+#[derive(
+    Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, Ord, PartialOrd, defmt::Format,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum CoreType {
     /// ARMv6-M: Cortex M0, M0+, M1
@@ -70,7 +72,7 @@ impl CoreType {
 }
 
 /// The architecture family of a specific [`CoreType`].
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, defmt::Format)]
 pub enum Architecture {
     /// An ARM core of one of the specific types [`CoreType::Armv6m`], [`CoreType::Armv7m`], [`CoreType::Armv7em`] or [`CoreType::Armv8m`]
     Arm,
@@ -92,7 +94,7 @@ impl CoreType {
 }
 
 /// Instruction set used by a core
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, defmt::Format)]
 pub enum InstructionSet {
     /// ARM Thumb 2 instruction set
     Thumb2,
@@ -177,26 +179,36 @@ pub struct ChipFamily<'a> {
     pub manufacturer: Option<JEP106Code>,
     /// The `target-gen` process will set this to `true`.
     /// Please change this to `false` if this file is modified from the generated, or is a manually created target description.
-    // #[serde(default)]
     pub generated_from_pack: bool,
     /// The latest release of the pack file from which this was generated.
     /// Values:
     /// - `Some("1.3.0")` if the latest pack file release was for example "1.3.0".
     /// - `None` if this was not generated from a pack file, or has been modified since it was generated.
-    // #[serde(default)]
     pub pack_file_release: Option<&'a str>,
     /// This vector holds all the variants of the family.
     pub variants: &'a [Chip<'a>],
     /// This vector holds all available algorithms.
     pub flash_algorithms: &'a [RawFlashAlgorithm<'a>],
-    // #[serde(skip, default = "default_source")]
     /// Source of the target description, used for diagnostics
     pub source: TargetDescriptionSource,
 }
 
-// fn default_source() -> TargetDescriptionSource {
-//     TargetDescriptionSource::External
-// }
+impl defmt::Format for ChipFamily<'_> {
+    fn format(&self, fmt: defmt::Formatter) {
+        defmt::write!(
+            fmt,
+            "ChipFamily {{ name: {}, manufacturer: {}({}), generated_from_pack: {}, pack_file_release: {}, variants: {}, flash_algorithms: {}, source: {} }}",
+            self.name,
+            self.manufacturer.map_or("NotListed", |x| x.get().unwrap_or("Unknown")),
+            self.manufacturer.map_or(None, |x| Some((x.id, x.cc))),
+            self.generated_from_pack,
+            self.pack_file_release,
+            self.variants,
+            self.flash_algorithms,
+            self.source,
+        )
+    }
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub enum ChipValidationError {
@@ -227,10 +239,11 @@ impl ChipFamily<'_> {
                     .iter()
                     .any(|algorithm| &algorithm.name == algorithm_name)
                 {
-                    // return Err(format!(
-                    //     "unknown flash algorithm `{}` for variant `{}`",
-                    //     algorithm_name, variant.name
-                    // ));
+                    defmt::error!(
+                        "unknown flash algorithm `{}` for variant `{}`",
+                        algorithm_name,
+                        variant.name
+                    );
                     return Err(ChipValidationError::UnknownFlashAlgorithm);
                 }
             }
@@ -244,17 +257,17 @@ impl ChipFamily<'_> {
                     .iter()
                     .any(|core| core.core_type.architecture() != architecture)
                 {
-                    // return Err(format!(
-                    //     "definition for variant `{}` contains mixed core architectures",
-                    //     variant.name
-                    // ));
+                    defmt::error!(
+                        "definition for variant `{}` contains mixed core architectures",
+                        variant.name
+                    );
                     return Err(ChipValidationError::MismatchCoreDef);
                 }
             } else {
-                // return Err(format!(
-                //     "definition for variant `{}` does not contain any cores",
-                //     variant.name
-                // ));
+                defmt::error!(
+                    "definition for variant `{}` does not contain any cores",
+                    variant.name
+                );
                 return Err(ChipValidationError::MissingCoreDef);
             }
 
@@ -272,31 +285,34 @@ impl ChipFamily<'_> {
                                 | CoreType::Armv8a
                                 | CoreType::Armv8m
                         ) {
-                            // return Err(format!(
-                            //     "Arm options don't match core type {:?} on core {}",
-                            //     core.core_type, core.name
-                            // ));
+                            defmt::error!(
+                                "Arm options don't match core type {:?} on core {}",
+                                core.core_type,
+                                core.name
+                            );
                             return Err(ChipValidationError::WrongCoreAccess(core.core_type));
                         }
 
                         if matches!(core.core_type, CoreType::Armv7a | CoreType::Armv8a)
                             && options.debug_base.is_none()
                         {
-                            // return Err(format!("Core {} requires setting debug_base", core.name));
+                            defmt::error!("Core {} requires setting debug_base", core.name);
                             return Err(ChipValidationError::RefusedDebugBase(core.core_type));
                         }
 
                         if core.core_type == CoreType::Armv8a && options.cti_base.is_none() {
-                            // return Err(format!("Core {} requires setting cti_base", core.name));
+                            defmt::error!("Core {} requires setting cti_base", core.name);
                             return Err(ChipValidationError::RefusedCtiBase(core.core_type));
                         }
                     }
                     CoreAccessOptions::Riscv(_) => {
                         if core.core_type != CoreType::Riscv {
-                            // return Err(format!(
-                            //     "Riscv options don't match core type {:?} on core {}",
-                            //     core.core_type, core.name
-                            // ));
+                            defmt::error!(
+                                "Riscv options don't match core type {:?} on core {}",
+                                core.core_type,
+                                core.name
+                            );
+
                             return Err(ChipValidationError::RefusedCoreOptionsRiscV(
                                 core.core_type,
                             ));
@@ -304,10 +320,12 @@ impl ChipFamily<'_> {
                     }
                     CoreAccessOptions::Xtensa(_) => {
                         if core.core_type != CoreType::Xtensa {
-                            // return Err(format!(
-                            //     "Xtensa options don't match core type {:?} on core {}",
-                            //     core.core_type, core.name
-                            // ));
+                            defmt::error!(
+                                "Xtensa options don't match core type {:?} on core {}",
+                                core.core_type,
+                                core.name
+                            );
+
                             return Err(ChipValidationError::RefusedCoreOptionsXtensa(
                                 core.core_type,
                             ));
@@ -316,33 +334,31 @@ impl ChipFamily<'_> {
                 }
             }
 
-            // let core_names: Vec<_> = variant.cores.iter().map(|core| &core.name).collect();
-
-            // for memory in &variant.memory_map {
-            // for memory in variant.memory_map {
             for (pos, memory) in variant.memory_map.iter().enumerate() {
                 // Ensure that the memory is assigned to a core, and that all the cores exist
 
                 for core in memory.cores() {
                     // if !core_names.contains(core) {
                     if !variant.is_core_existed(core) {
-                        // return Err(format!(
-                        //     "Variant {}, memory region {:?} is assigned to a non-existent core {}",
-                        //     variant.name, memory, core
-                        // ));
+                        defmt::error!(
+                            "Variant {}, memory region {:?} is assigned to a non-existent core {}",
+                            variant.name,
+                            memory,
+                            core
+                        );
+
                         return Err(ChipValidationError::MemoryRegionMappingIrregular(
                             pos as u16,
                         ));
                     }
                 }
 
-                // assert!(
-                //     !memory.cores().is_empty(),
-                //     "Variant {}, memory region {:?} is not assigned to a core",
-                //     variant.name,
-                //     memory
-                // );
                 if !memory.cores().is_empty() {
+                    defmt::error!(
+                        "Variant {}, memory region {:?} is not assigned to a core",
+                        variant.name,
+                        memory
+                    );
                     return Err(ChipValidationError::MemoryRegionNotAssignedCore(pos as u16));
                 }
             }

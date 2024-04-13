@@ -4,12 +4,11 @@ use serde::{Deserialize, Serialize};
 
 /// Represents a region in non-volatile memory (e.g. flash or EEPROM).
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
 pub struct NvmRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
     /// Address range of the region
-    // #[serde(serialize_with = "hex_range")]
     pub range: Range<u64>,
     /// True if the chip boots from this memory
     #[serde(default)]
@@ -32,12 +31,11 @@ impl NvmRegion<'_> {
 
 /// Represents a region in RAM.
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
 pub struct RamRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
     /// Address range of the region
-    // #[serde(serialize_with = "hex_range")]
     pub range: Range<u64>,
     /// True if the chip boots from this memory
     #[serde(default)]
@@ -47,12 +45,11 @@ pub struct RamRegion<'a> {
 }
 
 /// Represents a generic region.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
 pub struct GenericRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
     /// Address range of the region
-    // #[serde(serialize_with = "hex_range")]
     pub range: Range<u64>,
     /// List of cores that can access this region
     pub cores: &'a [&'a str],
@@ -60,7 +57,7 @@ pub struct GenericRegion<'a> {
 
 /// Holds information about a specific, individual flash
 /// sector.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, defmt::Format)]
 pub struct SectorInfo {
     /// Base address of the flash sector
     pub base_address: u64,
@@ -78,19 +75,17 @@ pub struct SectorInfo {
 /// changes the sector size.
 ///
 /// [`FlashProperties`]: crate::FlashProperties
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, defmt::Format)]
 pub struct SectorDescription {
     /// Size of each individual flash sector
-    // #[serde(serialize_with = "hex_u_int")]
     pub size: u64,
     /// Start address of the group of flash sectors, relative
     /// to the start address of the flash.
-    // #[serde(serialize_with = "hex_u_int")]
     pub address: u64,
 }
 
 /// Holds information about a page in flash.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, defmt::Format)]
 pub struct PageInfo {
     /// Base address of the page in flash.
     pub base_address: u64,
@@ -99,7 +94,7 @@ pub struct PageInfo {
 }
 
 /// Holds information about the entire flash.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, defmt::Format)]
 pub struct NvmInfo {
     pub rom_start: u64,
 }
@@ -152,7 +147,7 @@ impl MemoryRange for Range<u64> {
 
 /// Declares the type of a memory region.
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
 pub enum MemoryRegion<'a> {
     /// Memory region describing RAM.
     Ram(RamRegion<'a>),

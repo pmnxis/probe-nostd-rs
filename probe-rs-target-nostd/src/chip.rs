@@ -5,7 +5,7 @@ use crate::CoreType;
 use serde::{Deserialize, Serialize};
 
 /// Represents a DAP scan chain element.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, defmt::Format)]
 pub struct ScanChainElement<'a> {
     /// Unique name of the DAP
     pub name: Option<&'a str>,
@@ -14,7 +14,7 @@ pub struct ScanChainElement<'a> {
 }
 
 /// A finite list of all possible binary formats a target might support.
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq, Clone, defmt::Format)]
 #[serde(rename_all = "lowercase")]
 pub enum BinaryFormat {
     /// Program sections are bit-for-bit copied to flash.
@@ -26,7 +26,7 @@ pub enum BinaryFormat {
 
 /// Configuration for JTAG probes.
 // #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[derive(Debug, Clone, Serialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, PartialEq, defmt::Format)]
 pub struct Jtag<'a> {
     /// Describes the scan chain
     ///
@@ -41,7 +41,7 @@ pub struct Jtag<'a> {
 /// the `nRF52832` chip has two variants, `nRF52832_xxAA` and `nRF52832_xxBB`. For this case,
 /// the struct will correspond to one of the variants, e.g. `nRF52832_xxAA`.
 // #[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, defmt::Format)]
 pub struct Chip<'a> {
     /// This is the name of the chip in base form.
     /// E.g. `nRF52832`.
@@ -52,7 +52,6 @@ pub struct Chip<'a> {
     /// An URL to the SVD file for this chip.
     pub svd: Option<&'a str>,
     /// The cores available on the chip.
-    // #[serde(default)]
     /// The memory regions available on the chip.
     pub cores: &'a [Core<'a>],
     pub memory_map: &'a [MemoryRegion<'a>],
@@ -62,7 +61,6 @@ pub struct Chip<'a> {
     /// [`ChipFamily::flash_algorithms`] field.
     ///
     /// [`ChipFamily::flash_algorithms`]: crate::ChipFamily::flash_algorithms
-    // #[serde(default)]
     pub flash_algorithms: &'a [&'a str],
     /// Specific memory ranges to search for a dynamic RTT header for code
     /// running on this chip.
@@ -81,7 +79,6 @@ pub struct Chip<'a> {
     /// to the exact address of the RTT header.
     pub rtt_scan_ranges: Option<&'a [core::ops::Range<u64>]>,
     /// JTAG-specific options
-    // #[serde(default)]
     pub jtag: Option<Jtag<'a>>,
     /// The default binary format for this chip
     pub default_binary_format: Option<BinaryFormat>,
@@ -118,7 +115,7 @@ impl Chip<'_> {
 }
 
 /// An individual core inside a chip
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub struct Core<'a> {
     /// The core name.
     pub name: &'a str,
@@ -143,7 +140,7 @@ impl Core<'_> {
 }
 
 /// The data required to access a core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub enum CoreAccessOptions {
     /// ARM specific options
     Arm(ArmCoreAccessOptions),
@@ -154,7 +151,7 @@ pub enum CoreAccessOptions {
 }
 
 /// The data required to access an ARM core
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, defmt::Format)]
 pub struct ArmCoreAccessOptions {
     /// The access port number to access the core
     pub ap: u8,
@@ -162,23 +159,21 @@ pub struct ArmCoreAccessOptions {
     pub psel: u32,
     /// The base address of the debug registers for the core.
     /// Required for Cortex-A, optional for Cortex-M
-    // #[serde(serialize_with = "hex_option")]
     pub debug_base: Option<u64>,
     /// The base address of the cross trigger interface (CTI) for the core.
     /// Required in ARMv8-A
-    // #[serde(serialize_with = "hex_option")]
     pub cti_base: Option<u64>,
 }
 
 /// The data required to access a Risc-V core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub struct RiscvCoreAccessOptions {
     /// The hart id
     pub hart_id: Option<u32>,
 }
 
 /// The data required to access an Xtensa core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub struct XtensaCoreAccessOptions {}
 
 impl ArmCoreAccessOptions {
