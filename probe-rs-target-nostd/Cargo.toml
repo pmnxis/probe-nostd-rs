@@ -1,0 +1,27 @@
+[package]
+name = "probe-rs-target-nostd"
+version.workspace = true
+edition.workspace = true
+description = "No-std modification of probe-rs-target."
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+categories = ["nostd", "embedded", "hardware-support", "development-tools::debugging"]
+keywords = ["embedded"]
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.serde]
+version = "1"
+default-features = false
+features = ["derive"]
+
+[dependencies.base64]
+version = "0.22.0"
+default-features = false
+
+[dependencies.jep106]
+version = "0.2.8"
+default-features = false
