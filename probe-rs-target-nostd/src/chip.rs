@@ -1,6 +1,7 @@
 use super::memory::MemoryRegion;
-use crate::CoreType;
+use crate::{const_generic_core, BinaryFormat, CoreAccessOptions, CoreType};
 
+use probe_rs_target::ArmCoreAccessOptions;
 // use crate::{serialize::hex_option, CoreType};
 use serde::{Deserialize, Serialize};
 
@@ -11,17 +12,6 @@ pub struct ScanChainElement<'a> {
     pub name: Option<&'a str>,
     /// Specifies the IR length of the DAP (default value: 4).
     pub ir_len: Option<u8>,
-}
-
-/// A finite list of all possible binary formats a target might support.
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq, Clone, defmt::Format)]
-#[serde(rename_all = "lowercase")]
-pub enum BinaryFormat {
-    /// Program sections are bit-for-bit copied to flash.
-    #[default]
-    Raw,
-    /// Program sections are copied to flash, with the relevant headers and metadata for the [ESP-IDF bootloader](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/app_image_format.html#app-image-structures).
-    Idf,
 }
 
 /// Configuration for JTAG probes.
@@ -41,7 +31,7 @@ pub struct Jtag<'a> {
 /// the `nRF52832` chip has two variants, `nRF52832_xxAA` and `nRF52832_xxBB`. For this case,
 /// the struct will correspond to one of the variants, e.g. `nRF52832_xxAA`.
 // #[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Debug, Clone, defmt::Format)]
+#[derive(Debug, Clone, defmt::Format, Serialize)]
 pub struct Chip<'a> {
     /// This is the name of the chip in base form.
     /// E.g. `nRF52832`.
@@ -53,6 +43,7 @@ pub struct Chip<'a> {
     pub svd: Option<&'a str>,
     /// The cores available on the chip.
     /// The memory regions available on the chip.
+    #[serde(default)]
     pub cores: &'a [Core<'a>],
     pub memory_map: &'a [MemoryRegion<'a>],
     /// Names of all flash algorithms available for this chip.
@@ -61,6 +52,7 @@ pub struct Chip<'a> {
     /// [`ChipFamily::flash_algorithms`] field.
     ///
     /// [`ChipFamily::flash_algorithms`]: crate::ChipFamily::flash_algorithms
+    #[serde(default)]
     pub flash_algorithms: &'a [&'a str],
     /// Specific memory ranges to search for a dynamic RTT header for code
     /// running on this chip.
@@ -79,6 +71,7 @@ pub struct Chip<'a> {
     /// to the exact address of the RTT header.
     pub rtt_scan_ranges: Option<&'a [core::ops::Range<u64>]>,
     /// JTAG-specific options
+    #[serde(default)]
     pub jtag: Option<Jtag<'a>>,
     /// The default binary format for this chip
     pub default_binary_format: Option<BinaryFormat>,
@@ -89,7 +82,16 @@ impl Chip<'_> {
     /// and no flash algorithm or memory map. Used to create
     /// generic targets.
     pub fn generic_arm(name: &'static str, core_type: CoreType) -> Self {
-        let core = core_type.into_default_core();
+        let core = match core_type {
+            CoreType::Armv6m => &const_generic_core::ARM_V6M,
+            CoreType::Armv7a => &const_generic_core::ARM_V7A,
+            CoreType::Armv7m => &const_generic_core::ARM_V7M,
+            CoreType::Armv7em => &const_generic_core::ARM_V7EM,
+            CoreType::Armv8a => &const_generic_core::ARM_V8A,
+            CoreType::Armv8m => &const_generic_core::ARM_V8M,
+            CoreType::Riscv => &const_generic_core::RISCV,
+            CoreType::Xtensa => &const_generic_core::XTENSA,
+        };
 
         Chip {
             name,
@@ -130,8 +132,9 @@ pub struct Core<'a> {
 }
 
 impl Core<'_> {
+    /// Default for const
     pub const fn const_default(core_type: CoreType) -> Self {
-        Core {
+        Self {
             name: "main",
             core_type,
             core_access_options: CoreAccessOptions::Arm(ArmCoreAccessOptions::const_default()),
@@ -139,50 +142,51 @@ impl Core<'_> {
     }
 }
 
-/// The data required to access a core
-#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
-pub enum CoreAccessOptions {
-    /// ARM specific options
-    Arm(ArmCoreAccessOptions),
-    /// RISC-V specific options
-    Riscv(RiscvCoreAccessOptions),
-    /// Xtensa specific options
-    Xtensa(XtensaCoreAccessOptions),
-}
-
-/// The data required to access an ARM core
-#[derive(Debug, Clone, Serialize, Deserialize, Default, defmt::Format)]
-pub struct ArmCoreAccessOptions {
-    /// The access port number to access the core
-    pub ap: u8,
-    /// The port select number to access the core
-    pub psel: u32,
-    /// The base address of the debug registers for the core.
-    /// Required for Cortex-A, optional for Cortex-M
-    pub debug_base: Option<u64>,
-    /// The base address of the cross trigger interface (CTI) for the core.
-    /// Required in ARMv8-A
-    pub cti_base: Option<u64>,
-}
-
-/// The data required to access a Risc-V core
-#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
-pub struct RiscvCoreAccessOptions {
-    /// The hart id
-    pub hart_id: Option<u32>,
-}
-
-/// The data required to access an Xtensa core
-#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
-pub struct XtensaCoreAccessOptions {}
-
-impl ArmCoreAccessOptions {
-    pub const fn const_default() -> Self {
+impl From<&ScanChainElement<'_>> for probe_rs_target::ScanChainElement {
+    fn from(value: &ScanChainElement<'_>) -> Self {
         Self {
-            ap: 0,
-            psel: 0,
-            debug_base: None,
-            cti_base: None,
+            name: value.name.map(|x| x.to_string()),
+            ir_len: value.ir_len,
+        }
+    }
+}
+
+impl From<&Jtag<'_>> for probe_rs_target::Jtag {
+    fn from(value: &Jtag<'_>) -> Self {
+        Self {
+            scan_chain: value
+                .scan_chain
+                .map(|x| x.iter().map(|y| y.into()).collect()),
+        }
+    }
+}
+
+impl From<&Chip<'_>> for probe_rs_target::Chip {
+    fn from(value: &Chip<'_>) -> Self {
+        Self {
+            name: value.name.to_string(),
+            part: value.part,
+            svd: value.svd.map(|x| x.to_string()),
+            cores: value.cores.iter().map(|x| x.into()).collect(),
+            memory_map: value.memory_map.iter().map(|x| x.into()).collect(),
+            flash_algorithms: value
+                .flash_algorithms
+                .iter()
+                .map(|x| x.to_string())
+                .collect(),
+            rtt_scan_ranges: value.rtt_scan_ranges.map(|x| x.to_vec()),
+            jtag: value.jtag.clone().map(|x| (&x).into()),
+            default_binary_format: value.default_binary_format.clone(),
+        }
+    }
+}
+
+impl From<&Core<'_>> for probe_rs_target::Core {
+    fn from(value: &Core<'_>) -> Self {
+        Self {
+            name: value.name.to_string(),
+            core_type: value.core_type,
+            core_access_options: value.core_access_options.clone(),
         }
     }
 }

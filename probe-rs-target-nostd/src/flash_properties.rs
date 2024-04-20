@@ -1,7 +1,6 @@
-use super::memory::SectorDescription;
-// use crate::serialize::{hex_range, hex_u_int};
+use crate::SectorDescription;
 use core::ops::Range;
-// use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 /// Properties of flash memory, which
 /// are used when programming Flash memory.
@@ -36,5 +35,28 @@ impl Default for FlashProperties<'_> {
             erase_sector_timeout: 0,
             sectors: &[],
         }
+    }
+}
+
+impl From<&FlashProperties<'_>> for probe_rs_target::FlashProperties {
+    fn from(value: &FlashProperties<'_>) -> Self {
+        Self {
+            address_range: value.address_range.clone(),
+            page_size: value.page_size,
+            erased_byte_value: value.erased_byte_value,
+            program_page_timeout: value.program_page_timeout,
+            erase_sector_timeout: value.erase_sector_timeout,
+            sectors: { value.sectors.to_vec() },
+        }
+    }
+}
+
+impl Serialize for FlashProperties<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::FlashProperties = self.into();
+        allocable.serialize(serializer)
     }
 }

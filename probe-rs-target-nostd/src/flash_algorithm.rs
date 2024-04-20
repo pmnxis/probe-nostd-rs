@@ -5,27 +5,8 @@
  */
 
 use super::flash_properties::FlashProperties;
-// use crate::serialize::{hex_option, hex_u_int};
-// use base64::{engine::general_purpose as base64_engine, Engine as _};
-use serde::{Deserialize, Serialize};
-
-/// Data encoding used by the flash algorithm.
-#[derive(
-    Debug, Default, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, defmt::Format,
-)]
-#[serde(rename_all = "snake_case")]
-pub enum TransferEncoding {
-    /// Raw binary encoding. Probe-rs will not apply any transformation to the flash data.
-    #[default]
-    Raw,
-
-    /// Flash data is compressed using the `miniz_oxide` crate.
-    ///
-    /// Compressed images are written in page sized chunks, each chunk written to the image's start
-    /// address. The length of the compressed image is stored in the first 4 bytes of the first
-    /// chunk of the image.
-    Miniz,
-}
+use crate::TransferEncoding;
+use serde::Serialize;
 
 /// The raw flash algorithm is the description of a flash algorithm,
 /// and is usually read from a target description file.
@@ -78,4 +59,38 @@ pub struct RawFlashAlgorithm<'a> {
 
     /// The encoding format accepted by the flash algorithm.
     pub transfer_encoding: Option<TransferEncoding>,
+}
+
+impl From<&RawFlashAlgorithm<'_>> for probe_rs_target::RawFlashAlgorithm {
+    fn from(value: &RawFlashAlgorithm<'_>) -> Self {
+        probe_rs_target::RawFlashAlgorithm {
+            name: value.name.to_string(),
+            description: value.description.to_string(),
+            default: value.default,
+            instructions: value.instructions.to_vec(),
+            load_address: value.load_address,
+            data_load_address: value.data_load_address,
+            pc_init: value.pc_init,
+            pc_uninit: value.pc_uninit,
+            pc_program_page: value.pc_program_page,
+            pc_erase_sector: value.pc_erase_sector,
+            pc_erase_all: value.pc_erase_all,
+            data_section_offset: value.data_section_offset,
+            rtt_location: value.rtt_location,
+            flash_properties: (&value.flash_properties).into(),
+            cores: value.cores.iter().map(|x| x.to_string()).collect(),
+            stack_size: value.stack_size,
+            transfer_encoding: value.transfer_encoding,
+        }
+    }
+}
+
+impl Serialize for RawFlashAlgorithm<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::RawFlashAlgorithm = self.into();
+        allocable.serialize(serializer)
+    }
 }

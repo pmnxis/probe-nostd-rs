@@ -18,16 +18,29 @@ mod flash_properties;
 mod memory;
 pub(crate) mod serialize;
 
-pub use chip::{
-    ArmCoreAccessOptions, BinaryFormat, Chip, Core, CoreAccessOptions, Jtag,
-    RiscvCoreAccessOptions, ScanChainElement, XtensaCoreAccessOptions,
+#[cfg(feature = "std")]
+pub use {
+    chip::{
+        ArmCoreAccessOptions, BinaryFormat, Chip, Core, CoreAccessOptions, Jtag,
+        RiscvCoreAccessOptions, ScanChainElement, XtensaCoreAccessOptions,
+    },
+    chip_family::{Architecture, ChipFamily, CoreType, InstructionSet, TargetDescriptionSource},
+    flash_algorithm::{RawFlashAlgorithm, TransferEncoding},
+    flash_properties::FlashProperties,
+    memory::{
+        GenericRegion, MemoryRange, MemoryRegion, NvmInfo, NvmRegion, PageInfo, RamRegion,
+        SectorDescription, SectorInfo,
+    },
 };
-pub use chip_family::{
-    Architecture, ChipFamily, CoreType, InstructionSet, TargetDescriptionSource,
-};
-pub use flash_algorithm::{RawFlashAlgorithm, TransferEncoding};
-pub use flash_properties::FlashProperties;
-pub use memory::{
-    GenericRegion, MemoryRange, MemoryRegion, NvmRegion, PageInfo, RamRegion, SectorDescription,
-    SectorInfo,
+
+// no-std version
+#[cfg(not(feature = "std"))]
+pub use {
+    chip::{
+        ArmCoreAccessOptions, BinaryFormat, CoreAccessOptions, RiscvCoreAccessOptions,
+        XtensaCoreAccessOptions,
+    },
+    chip_family::{Architecture, CoreType, InstructionSet, TargetDescriptionSource},
+    flash_algorithm::TransferEncoding,
+    memory::{NvmInfo, PageInfo, SectorDescription, SectorInfo},
 };

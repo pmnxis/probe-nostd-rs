@@ -58,7 +58,7 @@ pub struct GenericRegion {
 
 /// Holds information about a specific, individual flash
 /// sector.
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, defmt::Format)]
 pub struct SectorInfo {
     /// Base address of the flash sector
     pub base_address: u64,
@@ -76,7 +76,7 @@ pub struct SectorInfo {
 /// changes the sector size.
 ///
 /// [`FlashProperties`]: crate::FlashProperties
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, defmt::Format)]
 pub struct SectorDescription {
     /// Size of each individual flash sector
     #[serde(serialize_with = "hex_u_int")]
@@ -88,7 +88,7 @@ pub struct SectorDescription {
 }
 
 /// Holds information about a page in flash.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, defmt::Format)]
 pub struct PageInfo {
     /// Base address of the page in flash.
     pub base_address: u64,
@@ -97,7 +97,7 @@ pub struct PageInfo {
 }
 
 /// Holds information about the entire flash.
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, defmt::Format)]
 pub struct NvmInfo {
     pub rom_start: u64,
 }

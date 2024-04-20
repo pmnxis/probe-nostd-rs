@@ -1,22 +1,20 @@
-// use crate::serialize::{hex_range, hex_u_int};
+use crate::NvmInfo;
 use core::ops::Range;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 /// Represents a region in non-volatile memory (e.g. flash or EEPROM).
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, defmt::Format)]
 pub struct NvmRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
     /// Address range of the region
     pub range: Range<u64>,
     /// True if the chip boots from this memory
-    #[serde(default)]
     pub is_boot_memory: bool,
     /// List of cores that can access this region
     pub cores: &'a [&'a str],
     /// True if the memory region is an alias of a different memory region.
-    #[serde(default)]
     pub is_alias: bool,
 }
 
@@ -31,21 +29,20 @@ impl NvmRegion<'_> {
 
 /// Represents a region in RAM.
 // #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, defmt::Format)]
 pub struct RamRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
     /// Address range of the region
     pub range: Range<u64>,
     /// True if the chip boots from this memory
-    #[serde(default)]
     pub is_boot_memory: bool,
     /// List of cores that can access this region
     pub cores: &'a [&'a str],
 }
 
 /// Represents a generic region.
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, defmt::Format)]
 pub struct GenericRegion<'a> {
     /// A name to describe the region
     pub name: Option<&'a str>,
@@ -53,50 +50,6 @@ pub struct GenericRegion<'a> {
     pub range: Range<u64>,
     /// List of cores that can access this region
     pub cores: &'a [&'a str],
-}
-
-/// Holds information about a specific, individual flash
-/// sector.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, defmt::Format)]
-pub struct SectorInfo {
-    /// Base address of the flash sector
-    pub base_address: u64,
-    /// Size of the flash sector
-    pub size: u64,
-}
-
-/// Information about a group of flash sectors, which
-/// is used as part of the [`FlashProperties`] struct.
-///
-/// The SectorDescription means that, starting at the
-/// flash address `address`, all following sectors will
-/// have a size of `size`. This is valid until either the
-/// end of the flash, or until another `SectorDescription`
-/// changes the sector size.
-///
-/// [`FlashProperties`]: crate::FlashProperties
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, defmt::Format)]
-pub struct SectorDescription {
-    /// Size of each individual flash sector
-    pub size: u64,
-    /// Start address of the group of flash sectors, relative
-    /// to the start address of the flash.
-    pub address: u64,
-}
-
-/// Holds information about a page in flash.
-#[derive(Debug, Copy, Clone, defmt::Format)]
-pub struct PageInfo {
-    /// Base address of the page in flash.
-    pub base_address: u64,
-    /// Size of the page
-    pub size: u32,
-}
-
-/// Holds information about the entire flash.
-#[derive(Debug, Copy, Clone, defmt::Format)]
-pub struct NvmInfo {
-    pub rom_start: u64,
 }
 
 /// Enables the user to do range intersection testing.
@@ -146,7 +99,6 @@ impl MemoryRange for Range<u64> {
 }
 
 /// Declares the type of a memory region.
-// #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, defmt::Format)]
 pub enum MemoryRegion<'a> {
     /// Memory region describing RAM.
@@ -196,6 +148,79 @@ impl MemoryRegion<'_> {
             MemoryRegion::Ram(region) => region.cores,
             MemoryRegion::Generic(region) => region.cores,
             MemoryRegion::Nvm(region) => region.cores,
+        }
+    }
+}
+
+impl From<&NvmRegion<'_>> for probe_rs_target::NvmRegion {
+    fn from(value: &NvmRegion<'_>) -> Self {
+        Self {
+            name: value.name.map(|x| x.to_string()),
+            range: value.range.clone(),
+            is_boot_memory: value.is_boot_memory,
+            cores: value.cores.iter().map(|x| x.to_string()).collect(),
+            is_alias: value.is_alias,
+        }
+    }
+}
+
+impl Serialize for NvmRegion<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::NvmRegion = self.into();
+        allocable.serialize(serializer)
+    }
+}
+
+impl From<&RamRegion<'_>> for probe_rs_target::RamRegion {
+    fn from(value: &RamRegion<'_>) -> Self {
+        Self {
+            name: value.name.map(|x| x.to_string()),
+            range: value.range.clone(),
+            is_boot_memory: value.is_boot_memory,
+            cores: value.cores.iter().map(|x| x.to_string()).collect(),
+        }
+    }
+}
+
+impl Serialize for RamRegion<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::RamRegion = self.into();
+        allocable.serialize(serializer)
+    }
+}
+
+impl From<&GenericRegion<'_>> for probe_rs_target::GenericRegion {
+    fn from(value: &GenericRegion<'_>) -> Self {
+        Self {
+            name: value.name.map(|x| x.to_string()),
+            range: value.range.clone(),
+            cores: value.cores.iter().map(|x| x.to_string()).collect(),
+        }
+    }
+}
+
+impl Serialize for GenericRegion<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::GenericRegion = self.into();
+        allocable.serialize(serializer)
+    }
+}
+
+impl From<&MemoryRegion<'_>> for probe_rs_target::MemoryRegion {
+    fn from(value: &MemoryRegion<'_>) -> Self {
+        match value {
+            MemoryRegion::Ram(x) => probe_rs_target::MemoryRegion::Ram(x.into()),
+            MemoryRegion::Generic(x) => probe_rs_target::MemoryRegion::Generic(x.into()),
+            MemoryRegion::Nvm(x) => probe_rs_target::MemoryRegion::Nvm(x.into()),
         }
     }
 }

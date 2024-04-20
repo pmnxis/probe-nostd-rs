@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// This is used for diagnostics, when
 /// an error related to a target description occurs.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, defmt::Format)]
 pub enum TargetDescriptionSource {
     /// The target description is a generic target description,
     /// which just describes a core type (e.g. M4), without any
@@ -25,7 +25,9 @@ pub enum TargetDescriptionSource {
 }
 
 /// Type of a supported core.
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(
+    Debug, Copy, Clone, Hash, PartialEq, Eq, Ord, PartialOrd, Serialize, Deserialize, defmt::Format,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum CoreType {
     /// ARMv6-M: Cortex M0, M0+, M1
@@ -57,7 +59,7 @@ impl CoreType {
 }
 
 /// The architecture family of a specific [`CoreType`].
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, defmt::Format)]
 pub enum Architecture {
     /// An ARM core of one of the specific types [`CoreType::Armv6m`], [`CoreType::Armv7m`], [`CoreType::Armv7em`] or [`CoreType::Armv8m`]
     Arm,
@@ -79,7 +81,7 @@ impl CoreType {
 }
 
 /// Instruction set used by a core
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, defmt::Format)]
 pub enum InstructionSet {
     /// ARM Thumb 2 instruction set
     Thumb2,

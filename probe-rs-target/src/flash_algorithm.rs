@@ -4,7 +4,9 @@ use base64::{engine::general_purpose as base64_engine, Engine as _};
 use serde::{Deserialize, Serialize};
 
 /// Data encoding used by the flash algorithm.
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(
+    Debug, Default, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, defmt::Format,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum TransferEncoding {
     /// Raw binary encoding. Probe-rs will not apply any transformation to the flash data.

@@ -1,169 +1,9 @@
-use crate::{Core, CoreAccessOptions};
+use crate::{CoreAccessOptions, CoreType, TargetDescriptionSource};
 
 use super::chip::Chip;
 use super::flash_algorithm::RawFlashAlgorithm;
 use jep106::JEP106Code;
-
-use super::const_generic_core;
-use serde::{Deserialize, Serialize};
-/// Source of a target description.
-///
-/// This is used for diagnostics, when
-/// an error related to a target description occurs.
-#[derive(Clone, Debug, PartialEq, Eq, defmt::Format)]
-pub enum TargetDescriptionSource {
-    /// The target description is a generic target description,
-    /// which just describes a core type (e.g. M4), without any
-    /// flash algorithm or memory description.
-    Generic,
-    /// The target description is a built-in target description,
-    /// which was included into probe-rs at compile time.
-    BuiltIn,
-    /// The target description was from an external source
-    /// during runtime.
-    External,
-}
-
-/// Type of a supported core.
-#[derive(
-    Debug, Copy, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, Ord, PartialOrd, defmt::Format,
-)]
-#[serde(rename_all = "snake_case")]
-pub enum CoreType {
-    /// ARMv6-M: Cortex M0, M0+, M1
-    Armv6m,
-    /// ARMv7-A: Cortex A7, A9, A15
-    Armv7a,
-    /// ARMv7-M: Cortex M3
-    Armv7m,
-    /// ARMv7e-M: Cortex M4, M7
-    Armv7em,
-    /// ARMv7-A: Cortex A35, A55, A72
-    Armv8a,
-    /// ARMv8-M: Cortex M23, M33
-    Armv8m,
-    /// RISC-V
-    Riscv,
-    /// Xtensa - TODO: may need to split into NX, LX6 and LX7
-    Xtensa,
-}
-
-impl CoreType {
-    /// Returns true if the core type is an ARM Cortex-M
-    pub fn is_cortex_m(&self) -> bool {
-        matches!(
-            self,
-            CoreType::Armv6m | CoreType::Armv7em | CoreType::Armv7m | CoreType::Armv8m
-        )
-    }
-
-    pub const fn into_default_core(self) -> &'static [Core<'static>] {
-        match self {
-            Self::Armv6m => &const_generic_core::ARM_V6M,
-            Self::Armv7a => &const_generic_core::ARM_V7A,
-            Self::Armv7m => &const_generic_core::ARM_V7M,
-            Self::Armv7em => &const_generic_core::ARM_V7EM,
-            Self::Armv8a => &const_generic_core::ARM_V8A,
-            Self::Armv8m => &const_generic_core::ARM_V8M,
-            Self::Riscv => &const_generic_core::RISCV,
-            Self::Xtensa => &const_generic_core::XTENSA,
-        }
-    }
-}
-
-/// The architecture family of a specific [`CoreType`].
-#[derive(Clone, Copy, Debug, PartialEq, Eq, defmt::Format)]
-pub enum Architecture {
-    /// An ARM core of one of the specific types [`CoreType::Armv6m`], [`CoreType::Armv7m`], [`CoreType::Armv7em`] or [`CoreType::Armv8m`]
-    Arm,
-    /// A RISC-V core.
-    Riscv,
-    /// An Xtensa core.
-    Xtensa,
-}
-
-impl CoreType {
-    /// Returns the parent architecture family of this core type.
-    pub fn architecture(&self) -> Architecture {
-        match self {
-            CoreType::Riscv => Architecture::Riscv,
-            CoreType::Xtensa => Architecture::Xtensa,
-            _ => Architecture::Arm,
-        }
-    }
-}
-
-/// Instruction set used by a core
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize, defmt::Format)]
-pub enum InstructionSet {
-    /// ARM Thumb 2 instruction set
-    Thumb2,
-    /// ARM A32 (often just called ARM) instruction set
-    A32,
-    /// ARM A64 (aarch64) instruction set
-    A64,
-    /// RISC-V 32-bit uncompressed instruction sets (RV32) - covers all ISA variants that use 32-bit instructions.
-    RV32,
-    /// RISC-V 32-bit compressed instruction sets (RV32C) - covers all ISA variants that allow compressed 16-bit instructions.
-    RV32C,
-    /// Xtensa instruction set
-    Xtensa,
-}
-
-impl InstructionSet {
-    /// Get the instruction set from a rustc target triple.
-    pub fn from_target_triple(triple: &str) -> Option<Self> {
-        match triple.split('-').next()? {
-            "thumbv6m" | "thumbv7em" | "thumbv7m" | "thumbv8m" => Some(InstructionSet::Thumb2),
-            "arm" => Some(InstructionSet::A32),
-            "aarch64" => Some(InstructionSet::A64),
-            "xtensa" => Some(InstructionSet::Xtensa),
-            other => {
-                if let Some(features) = other.strip_prefix("riscv32") {
-                    if features.contains('c') {
-                        Some(InstructionSet::RV32C)
-                    } else {
-                        Some(InstructionSet::RV32)
-                    }
-                } else {
-                    None
-                }
-            }
-        }
-    }
-
-    /// Get the minimum instruction size in bytes.
-    pub fn get_minimum_instruction_size(&self) -> u8 {
-        match self {
-            InstructionSet::Thumb2 => {
-                // Thumb2 uses a variable size (2 or 4) instruction set. For our purposes, we set it as 2, so that we don't accidentally read outside of addressable memory.
-                2
-            }
-            InstructionSet::A32 => 4,
-            InstructionSet::A64 => 4,
-            InstructionSet::RV32 => 4,
-            InstructionSet::RV32C => 2,
-            InstructionSet::Xtensa => 2,
-        }
-    }
-    /// Get the maximum instruction size in bytes. All supported architectures have a maximum instruction size of 4 bytes.
-    pub fn get_maximum_instruction_size(&self) -> u8 {
-        // TODO: Xtensa may have wide instructions
-        4
-    }
-
-    /// Returns whether a CPU with the `self` instruction set is compatible with a program compiled for `instr_set`.
-    pub fn is_compatible(&self, instr_set: InstructionSet) -> bool {
-        if *self == instr_set {
-            return true;
-        }
-
-        matches!(
-            (self, instr_set),
-            (InstructionSet::RV32C, InstructionSet::RV32)
-        )
-    }
-}
+use serde::Serialize;
 
 /// This describes a chip family with all its variants.
 ///
@@ -181,7 +21,7 @@ pub struct ChipFamily<'a> {
     /// Please change this to `false` if this file is modified from the generated, or is a manually created target description.
     pub generated_from_pack: bool,
     /// The latest release of the pack file from which this was generated.
-    /// Values:
+    /// Values:e
     /// - `Some("1.3.0")` if the latest pack file release was for example "1.3.0".
     /// - `None` if this was not generated from a pack file, or has been modified since it was generated.
     pub pack_file_release: Option<&'a str>,
@@ -384,5 +224,29 @@ impl ChipFamily<'_> {
     pub fn get_algorithm(&self, name: impl AsRef<str>) -> Option<&RawFlashAlgorithm> {
         let name = name.as_ref();
         self.flash_algorithms.iter().find(|elem| elem.name == name)
+    }
+}
+
+impl From<&ChipFamily<'_>> for probe_rs_target::ChipFamily {
+    fn from(value: &ChipFamily<'_>) -> Self {
+        probe_rs_target::ChipFamily {
+            name: value.name.to_string(),
+            manufacturer: value.manufacturer,
+            generated_from_pack: value.generated_from_pack,
+            pack_file_release: value.pack_file_release.map(|x| x.to_string()),
+            variants: value.variants.iter().map(|x| x.into()).collect(),
+            flash_algorithms: value.flash_algorithms.iter().map(|x| x.into()).collect(),
+            source: value.source,
+        }
+    }
+}
+
+impl Serialize for ChipFamily<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let allocable: probe_rs_target::ChipFamily = self.into();
+        allocable.serialize(serializer)
     }
 }

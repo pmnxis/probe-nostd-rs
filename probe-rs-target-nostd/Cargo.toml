@@ -28,3 +28,12 @@ default-features = false
 
 [dependencies.defmt]
 version = "0.3"
+
+[dependencies.probe-rs-target] # nostd mod
+workspace = true
+default-features = false
+features = []
+
+[features]
+default = ["std"]
+std = []

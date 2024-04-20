@@ -12,7 +12,7 @@ pub struct ScanChainElement {
 }
 
 /// A finite list of all possible binary formats a target might support.
-#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[derive(Debug, Default, Serialize, Deserialize, PartialEq, Eq, Clone, defmt::Format)]
 #[serde(rename_all = "lowercase")]
 pub enum BinaryFormat {
     /// Program sections are bit-for-bit copied to flash.
@@ -122,7 +122,7 @@ pub struct Core {
 }
 
 /// The data required to access a core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub enum CoreAccessOptions {
     /// ARM specific options
     Arm(ArmCoreAccessOptions),
@@ -133,7 +133,7 @@ pub enum CoreAccessOptions {
 }
 
 /// The data required to access an ARM core
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, defmt::Format)]
 pub struct ArmCoreAccessOptions {
     /// The access port number to access the core
     pub ap: u8,
@@ -150,12 +150,24 @@ pub struct ArmCoreAccessOptions {
 }
 
 /// The data required to access a Risc-V core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub struct RiscvCoreAccessOptions {
     /// The hart id
     pub hart_id: Option<u32>,
 }
 
 /// The data required to access an Xtensa core
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, defmt::Format)]
 pub struct XtensaCoreAccessOptions {}
+
+impl ArmCoreAccessOptions {
+    /// Default for const
+    pub const fn const_default() -> Self {
+        Self {
+            ap: 0,
+            psel: 0,
+            debug_base: None,
+            cti_base: None,
+        }
+    }
+}
