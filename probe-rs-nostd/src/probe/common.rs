@@ -5,6 +5,8 @@ use std::iter;
 use anyhow::anyhow;
 use bitfield::bitfield;
 use bitvec::prelude::*;
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 
 use crate::probe::{

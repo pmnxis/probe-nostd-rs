@@ -23,6 +23,8 @@ use crate::{
     Error as ProbeRsError,
 };
 use constants::{commands, JTagFrequencyToDivider, Mode, Status, SwdFrequencyToDelayCount};
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 use scroll::{Pread, Pwrite, BE, LE};
 use std::{cmp::Ordering, sync::Arc, time::Duration};

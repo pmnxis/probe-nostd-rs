@@ -13,17 +13,21 @@ license = "MIT OR Apache-2.0"
 resolver = "2"
 members = [
     "probe-rs",
+    "probe-rs-nostd",
     "probe-rs-target",
+    "probe-rs-target-nostd",
     "rtthost",
     "smoke-tester",
     "xtask",
-    "target-gen", "probe-rs-target-nostd",
+    "target-gen",
 ]
 exclude = ["probe-rs/tests/gpio-hal-blinky"]
 
 [workspace.dependencies]
 probe-rs = { path = "probe-rs", version = "0.23.0" }
 probe-rs-target = { path = "probe-rs-target", version = "0.23.0" }
+probe-rs-nostd = { path = "probe-rs-nostd", version = "0.23.0" }
+probe-rs-target-nostd = { path = "probe-rs-target-nostd", version = "0.23.0" }
 
 docsplay = "0.1.1"
 thiserror = "1.0.58"

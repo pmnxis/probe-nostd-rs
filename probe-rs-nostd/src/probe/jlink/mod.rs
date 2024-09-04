@@ -19,6 +19,8 @@ use bitvec::prelude::*;
 
 use nusb::transfer::{Direction, EndpointType};
 use nusb::DeviceInfo;
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 use tracing::{debug, trace, warn};
 

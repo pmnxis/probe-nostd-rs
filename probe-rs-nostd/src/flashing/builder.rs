@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use std::fmt::{Debug, Formatter};
 use std::ops::Range;
 
+// TODO! - Use me
+// use probe_rs_target_nostd::{MemoryRange, NvmRegion, PageInfo};
 use probe_rs_target::{MemoryRange, NvmRegion, PageInfo};
 
 use super::{FlashAlgorithm, FlashError, FlashVisualizer};
@@ -372,7 +374,7 @@ impl FlashBuilder {
 
 #[cfg(test)]
 mod tests {
-    use probe_rs_target::{FlashProperties, SectorDescription};
+    use probe_rs_target_nostd::{FlashProperties, SectorDescription};
 
     use super::*;
 

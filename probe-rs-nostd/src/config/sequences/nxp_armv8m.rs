@@ -622,6 +622,7 @@ impl ArmDebugSequence for MIMXRT5xxS {
     fn reset_system(
         &self,
         probe: &mut dyn ArmProbe,
+        // _core_type: probe_rs_target_nostd::CoreType,
         core_type: probe_rs_target::CoreType,
         _debug_base: Option<u64>,
     ) -> Result<(), ArmError> {

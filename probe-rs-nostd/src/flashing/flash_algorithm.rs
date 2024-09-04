@@ -1,5 +1,9 @@
 use super::FlashError;
 use crate::{architecture::riscv, core::Architecture, Target};
+// TODO! - Use me
+// use probe_rs_target_nostd::{
+//     FlashProperties, PageInfo, RamRegion, RawFlashAlgorithm, SectorInfo, TransferEncoding,
+// };
 use probe_rs_target::{
     FlashProperties, PageInfo, RamRegion, RawFlashAlgorithm, SectorInfo, TransferEncoding,
 };
@@ -368,6 +372,8 @@ impl FlashAlgorithm {
 
 #[cfg(test)]
 mod test {
+    // TODO! - Use me
+    // use probe_rs_target_nostd::{FlashProperties, SectorDescription, SectorInfo};
     use probe_rs_target::{FlashProperties, SectorDescription, SectorInfo};
 
     use crate::flashing::FlashAlgorithm;

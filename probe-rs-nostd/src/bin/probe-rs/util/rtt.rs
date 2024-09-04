@@ -4,6 +4,8 @@ use defmt_decoder::DecodeError;
 pub use probe_rs::rtt::ChannelMode;
 use probe_rs::rtt::{DownChannel, Error, Rtt, ScanRegion, UpChannel};
 use probe_rs::{Core, Session};
+// TODO! - Use me
+// use probe_rs_target_nostd::MemoryRegion;
 use probe_rs_target::MemoryRegion;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

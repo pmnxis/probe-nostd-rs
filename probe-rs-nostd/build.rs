@@ -3,7 +3,7 @@ use std::fs::{read_dir, read_to_string};
 use std::io;
 use std::path::{Path, PathBuf};
 
-use probe_rs_target::ChipFamily;
+// use probe_rs_target_nostd::ChipFamily;
 
 fn main() {
     #[cfg(feature = "cli")]
@@ -22,7 +22,7 @@ fn main() {
         return;
     }
 
-    let mut families: Vec<ChipFamily> = Vec::new();
+    let mut families: Vec<probe_rs_target::ChipFamily> = Vec::new();
 
     let mut files = vec![];
     visit_dirs(Path::new("targets"), &mut files).unwrap();
@@ -43,7 +43,7 @@ fn main() {
             "Algorithm definition file could not be read. This is a bug. Please report it.",
         );
 
-        let yaml: Result<ChipFamily, _> = serde_yaml::from_str(&string);
+        let yaml: Result<probe_rs_target::ChipFamily, _> = serde_yaml::from_str(&string);
 
         match yaml {
             Ok(familiy) => families.push(familiy),
@@ -58,7 +58,7 @@ fn main() {
     let dest_path = Path::new(&out_dir).join("targets.bincode");
     std::fs::write(dest_path, &families_bin).unwrap();
 
-    let _: Vec<ChipFamily> = match bincode::deserialize(&families_bin) {
+    let _: Vec<probe_rs_target::ChipFamily> = match bincode::deserialize(&families_bin) {
         Ok(chip_families) => chip_families,
         Err(deserialize_error) => panic!(
             "Failed to deserialize supported target definitions from bincode: {deserialize_error:?}"

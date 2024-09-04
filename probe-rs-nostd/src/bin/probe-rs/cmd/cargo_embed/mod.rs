@@ -10,6 +10,9 @@ use probe_rs::gdb_server::GdbInstanceConfiguration;
 use probe_rs::probe::list::Lister;
 use probe_rs::rtt::ScanRegion;
 use probe_rs::{probe::DebugProbeSelector, Session};
+
+// TODO! - Use me
+// use probe_rs_target_nostd::MemoryRegion;
 use probe_rs_target::MemoryRegion;
 use std::ffi::OsString;
 use std::fs;

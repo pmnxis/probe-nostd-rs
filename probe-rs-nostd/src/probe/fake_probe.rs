@@ -1,6 +1,8 @@
 #![allow(missing_docs)] // Don't require docs for test code
 use std::{cell::RefCell, collections::VecDeque, fmt::Debug, sync::Arc};
 
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 
 use crate::{

@@ -5,6 +5,8 @@ use crate::{
 };
 use anyhow::anyhow;
 use gimli::UnitOffset;
+// TODO! - Use me
+// use probe_rs_target::InstructionSet;
 use probe_rs_target::MemoryRange;
 use serde::{Serialize, Serializer};
 use std::{

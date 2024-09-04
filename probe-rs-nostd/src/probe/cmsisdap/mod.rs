@@ -52,6 +52,8 @@ use commands::{
     },
     CmsisDapDevice, Status,
 };
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 
 use std::{fmt::Write, time::Duration};

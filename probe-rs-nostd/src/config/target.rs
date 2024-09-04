@@ -31,6 +31,8 @@ use crate::architecture::{
     xtensa::sequences::{DefaultXtensaSequence, XtensaDebugSequence},
 };
 use crate::flashing::FlashLoader;
+// TODO! - Use me
+// use probe_rs_target_nostd::{Architecture, BinaryFormat, ChipFamily, Jtag, MemoryRange};
 use probe_rs_target::{Architecture, BinaryFormat, ChipFamily, Jtag, MemoryRange};
 use std::sync::Arc;
 
@@ -364,6 +366,7 @@ pub(crate) trait CoreExt {
 impl CoreExt for Core {
     fn memory_ap(&self) -> Option<MemoryAp> {
         match &self.core_access_options {
+            // probe_rs_target_nostd::CoreAccessOptions::Arm(options) => {
             probe_rs_target::CoreAccessOptions::Arm(options) => Some(MemoryAp::new(ApAddress {
                 dp: match options.psel {
                     0 => DpAddress::Default,
@@ -371,7 +374,9 @@ impl CoreExt for Core {
                 },
                 ap: options.ap,
             })),
+            // probe_rs_target_nostd::CoreAccessOptions::Riscv(_) => None,
             probe_rs_target::CoreAccessOptions::Riscv(_) => None,
+            // probe_rs_target_nostd::CoreAccessOptions::Xtensa(_) => None,
             probe_rs_target::CoreAccessOptions::Xtensa(_) => None,
         }
     }

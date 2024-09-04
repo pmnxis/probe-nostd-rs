@@ -29,6 +29,8 @@ use crate::config::TargetSelector;
 use crate::probe::common::IdCode;
 use crate::{Error, Permissions, Session};
 use nusb::DeviceInfo;
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 use std::collections::HashMap;
 use std::fmt;

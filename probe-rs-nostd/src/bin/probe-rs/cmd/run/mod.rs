@@ -19,6 +19,8 @@ use probe_rs::{
     exception_handler_for_core, probe::list::Lister, Core, CoreInterface, Error, HaltReason,
     Session, VectorCatchCondition,
 };
+// TODO! - Use me
+// use probe_rs_target_nostd::MemoryRegion;
 use probe_rs_target::MemoryRegion;
 use signal_hook::consts::signal;
 use time::UtcOffset;

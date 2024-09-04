@@ -239,6 +239,8 @@ impl ArmDebugSequence for XMC4000 {
     fn reset_catch_clear(
         &self,
         core: &mut dyn ArmProbe,
+        // TODO! - Use me
+        // _core_type: probe_rs_target_nostd::CoreType,
         _core_type: probe_rs_target::CoreType,
         _debug_base: Option<u64>,
     ) -> Result<(), ArmError> {
@@ -276,6 +278,7 @@ impl ArmDebugSequence for XMC4000 {
     fn reset_system(
         &self,
         core: &mut dyn ArmProbe,
+        // _core_type: probe_rs_target_nostd::CoreType,
         _core_type: probe_rs_target::CoreType,
         _debug_base: Option<u64>,
     ) -> Result<(), ArmError> {

@@ -22,6 +22,8 @@ use self::protocol::ProtocolHandler;
 use super::{common::JtagDriverState, JTAGAccess};
 
 use crate::architecture::riscv::dtm::jtag_dtm::JtagDtm;
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 
 /// Probe factory for USB JTAG interfaces built into certain ESP32 chips.

@@ -8,6 +8,8 @@ use core::fmt;
 use std::time::Duration;
 
 use nusb::DeviceInfo;
+// TODO! - Use me
+// use probe_rs_target_nostd::ScanChainElement;
 use probe_rs_target::ScanChainElement;
 
 use self::{commands::Speed, usb_interface::WchLinkUsbDevice};
