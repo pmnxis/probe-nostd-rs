@@ -22,6 +22,19 @@ base64 = "0.22"
 default = []
 defmt = ["dep:defmt"]
 
+# Each target-* feature includes the chip definitions and flash algorithm
+# binaries for that family. Flash usage per family varies widely:
+#
+#   Family        | Algo binary | Chip variants
+#   RP2040        |     364B    |  2
+#   SAMD21        |     952B    | 34
+#   STM32F4       |   22.3KB   | 149
+#   nRF52         |    ~2KB    | 14
+#   ESP32-C3      |   3.1KB    |  1
+#   STM32H7       |  ~398KB    | 129  <-- see warning below
+#
+# Enable only the families you need to minimize Flash consumption.
+
 target-aducm302x = []
 target-air001 = []
 target-air32f1 = []
@@ -224,6 +237,9 @@ target-stm32f7 = []
 target-stm32g0 = []
 target-stm32g4 = []
 target-stm32h5 = []
+# WARNING: STM32H7 has 14 flash algorithms totaling ~398KB of binary data.
+# Enabling this feature adds ~400KB+ to Flash. Most other families are <25KB.
+# Consider whether you actually need all H7 variants or just a specific one.
 target-stm32h7 = []
 target-stm32h7rs = []
 target-stm32l0 = []

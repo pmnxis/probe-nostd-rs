@@ -1,0 +1,25 @@
+[package]
+name = "probe-rs-cmd"
+version.workspace = true
+edition.workspace = true
+description = "no_std command interpreter for probe-rs"
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+license.workspace = true
+rust-version = "1.95"
+
+[dependencies]
+probe-rs-wire = { path = "../probe-rs-wire" }
+probe-rs-adi = { path = "../probe-rs-adi" }
+probe-rs-flash-nostd = { path = "../probe-rs-flash-nostd" }
+probe-rs-target-nostd = { path = "../probe-rs-target-nostd" }
+defmt = { version = "0.3", optional = true }
+
+[features]
+default = []
+defmt = ["dep:defmt", "probe-rs-wire/defmt", "probe-rs-adi/defmt", "probe-rs-flash-nostd/defmt", "probe-rs-target-nostd/defmt"]
+
+[lints]
+workspace = true

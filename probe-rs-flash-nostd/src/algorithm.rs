@@ -3,6 +3,12 @@
 //! A CMSIS flash algorithm is a small ARM binary that runs in the target's RAM.
 //! This module computes the absolute addresses for code, data, stack, and page
 //! buffer given the algorithm definition and available RAM.
+//!
+//! NOTE on Flash size: Algorithm binary sizes vary enormously between families.
+//! Most are small (RP2040: 364B, SAMD21: 952B, ESP32-C3: 3KB), but STM32H7 has
+//! ~398KB across 14 algorithms (dual-bank, OTP, option bytes, etc.). These are
+//! embedded in host firmware Flash via probe-rs-target-nostd feature flags --
+//! choose target features carefully for Flash-constrained host MCUs.
 
 use probe_rs_target_nostd::{FlashAlgoDef, FlashProperties};
 
