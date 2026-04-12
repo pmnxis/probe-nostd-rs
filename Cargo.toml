@@ -17,6 +17,8 @@ resolver = "2"
 members = [
     "probe-rs",
     "probe-rs-target",
+    "probe-rs-wire",
+    "probe-rs-adi",
     "smoke-tester",
     "smoke-tester-macros",
     "xtask",
@@ -25,6 +27,7 @@ members = [
     "probe-rs-mi",
     "probe-rs-debug",
     "probe-rs-espressif",
+    "probe-rs-target-nostd",
 ]
 exclude = ["probe-rs/tests/gpio-hal-blinky"]
 

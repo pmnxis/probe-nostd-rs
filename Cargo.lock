@@ -938,6 +938,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "26bf8fc351c5ed29b5c2f0cbbac1b209b74f60ecd62e675a998df72c49af5204"
 
 [[package]]
+name = "defmt"
+version = "0.3.100"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0963443817029b2024136fc4dd07a5107eb8f977eaf18fcd1fdeb11306b64ad"
+dependencies = [
+ "defmt 1.0.1",
+]
+
+[[package]]
+name = "defmt"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "548d977b6da32fa1d1fda2876453da1e7df63ad0304c8b3dae4dbe7b96f39b78"
+dependencies = [
+ "bitflags 1.3.2",
+ "defmt-macros",
+]
+
+[[package]]
 name = "defmt-decoder"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -970,6 +989,19 @@ checksum = "96b04d228e57a61cf385d86bc8980bb41b47c6fc0eace90592668df97b2dad6a"
 dependencies = [
  "log",
  "serde",
+]
+
+[[package]]
+name = "defmt-macros"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3d4fc12a85bcf441cfe44344c4b72d58493178ce635338a3f3b78943aceb258e"
+dependencies = [
+ "defmt-parser",
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]
@@ -1142,6 +1174,12 @@ name = "either"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "48c757948c5ede0e46177b7add2e67155f70e33c07fea8284df6576da70b3719"
+
+[[package]]
+name = "embedded-hal"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "361a90feb7004eca4019fb28352a9465666b24f840f5c3cddf0ff13920590b89"
 
 [[package]]
 name = "embedded-io"
@@ -2925,6 +2963,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "probe-rs-adi"
+version = "0.31.0"
+dependencies = [
+ "defmt 0.3.100",
+ "probe-rs-wire",
+]
+
+[[package]]
 name = "probe-rs-debug"
 version = "0.31.0"
 dependencies = [
@@ -2981,6 +3027,16 @@ dependencies = [
  "jep106",
  "serde",
  "serde_with",
+ "serde_yaml",
+]
+
+[[package]]
+name = "probe-rs-target-nostd"
+version = "0.31.0"
+dependencies = [
+ "base64",
+ "defmt 0.3.100",
+ "serde",
  "serde_yaml",
 ]
 
@@ -3062,6 +3118,14 @@ dependencies = [
  "urlencoding",
  "uuid",
  "zip",
+]
+
+[[package]]
+name = "probe-rs-wire"
+version = "0.31.0"
+dependencies = [
+ "defmt 0.3.100",
+ "embedded-hal",
 ]
 
 [[package]]

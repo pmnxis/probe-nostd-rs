@@ -1,0 +1,25 @@
+[package]
+name = "probe-rs-wire"
+version.workspace = true
+edition.workspace = true
+description = "no_std SWD/JTAG wire protocol layer for probe-rs"
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+license.workspace = true
+# Pinned to nightly-2026-04-11 (1.97.0-nightly) for const trait experiments.
+# Minimum usable stable: 1.95 (when released).
+rust-version = "1.95"
+
+[dependencies]
+embedded-hal = "1.0"
+defmt = { version = "0.3", optional = true }
+
+[features]
+default = []
+defmt = ["dep:defmt"]
+jtag = []
+
+[lints]
+workspace = true
