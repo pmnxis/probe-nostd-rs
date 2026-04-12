@@ -97,7 +97,7 @@ pub struct FlashAlgoDef {
     pub flash_properties: FlashProperties,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct FlashProperties {
     pub address_range_start: u64,
@@ -109,7 +109,7 @@ pub struct FlashProperties {
     pub sectors: &'static [SectorDescription],
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct SectorDescription {
     pub size: u64,

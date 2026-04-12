@@ -67,11 +67,7 @@ where
     /// - `delay`: delay provider
     /// - `frequency_hz`: initial SWD clock frequency in Hz
     pub fn new(io: IO, clk: CLK, delay: DELAY, frequency_hz: u32) -> Self {
-        let half_period_ns = if frequency_hz > 0 {
-            500_000_000 / frequency_hz
-        } else {
-            5000 // default 100kHz
-        };
+        let half_period_ns = (500_000_000u32).checked_div(frequency_hz).unwrap_or(5000); // default 100kHz if frequency_hz == 0
 
         Self {
             io,

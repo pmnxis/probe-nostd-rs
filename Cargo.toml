@@ -28,6 +28,7 @@ members = [
     "probe-rs-debug",
     "probe-rs-espressif",
     "probe-rs-target-nostd",
+    "probe-rs-flash-nostd",
 ]
 exclude = ["probe-rs/tests/gpio-hal-blinky"]
 

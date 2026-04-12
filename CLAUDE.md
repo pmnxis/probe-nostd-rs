@@ -51,6 +51,20 @@
 - **No laziness:** Find the root cause. No temporary fixes. Senior developer standards.
 - **Minimal blast radius:** Change only what's needed. No introducing new bugs.
 
+## Code Patterns
+
+- When `too_many_arguments` clippy warning occurs, prefer refactoring into a struct-based
+  parameter pattern (builder or config struct) rather than `#[allow]`. Example:
+  ```rust
+  // Instead of: fn call(pc, r0, r1, r2, r3, init, max_polls) -> ...
+  // Use a struct:
+  struct FunctionCall { pc: u64, args: [u32; 4], init: bool, max_polls: u32 }
+  fn call(&mut self, params: &FunctionCall) -> ...
+  ```
+  Reference: Rust's `Iteration`-style structs where configuration is bundled.
+  Apply this pattern when adding new functions. Existing `#[allow]` instances are
+  candidates for future refactoring.
+
 ## Project-Specific
 
 - This is a `no_std` extraction of [probe-rs](https://github.com/probe-rs/probe-rs) for embedded targets (ESP32, STM32H7, RP2040, etc.)
