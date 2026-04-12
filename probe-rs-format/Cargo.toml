@@ -1,0 +1,24 @@
+[package]
+name = "probe-rs-format"
+version.workspace = true
+edition.workspace = true
+description = "no_std firmware file format parsers (Intel HEX, UF2, ELF, BIN)"
+documentation.workspace = true
+homepage.workspace = true
+repository.workspace = true
+readme.workspace = true
+license.workspace = true
+rust-version = "1.95"
+
+[dependencies]
+defmt = { version = "0.3", optional = true }
+
+[features]
+default = ["ihex", "uf2", "elf"]
+ihex = []
+uf2 = []
+elf = []
+defmt = ["dep:defmt"]
+
+[lints]
+workspace = true

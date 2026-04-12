@@ -30,6 +30,7 @@ members = [
     "probe-rs-target-nostd",
     "probe-rs-flash-nostd",
     "probe-rs-cmd",
+    "probe-rs-format",
 ]
 exclude = ["probe-rs/tests/gpio-hal-blinky"]
 
