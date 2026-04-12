@@ -939,15 +939,6 @@ checksum = "26bf8fc351c5ed29b5c2f0cbbac1b209b74f60ecd62e675a998df72c49af5204"
 
 [[package]]
 name = "defmt"
-version = "0.3.100"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0963443817029b2024136fc4dd07a5107eb8f977eaf18fcd1fdeb11306b64ad"
-dependencies = [
- "defmt 1.0.1",
-]
-
-[[package]]
-name = "defmt"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "548d977b6da32fa1d1fda2876453da1e7df63ad0304c8b3dae4dbe7b96f39b78"
@@ -2966,7 +2957,7 @@ dependencies = [
 name = "probe-rs-adi"
 version = "0.31.0"
 dependencies = [
- "defmt 0.3.100",
+ "defmt",
  "probe-rs-wire",
 ]
 
@@ -2974,7 +2965,7 @@ dependencies = [
 name = "probe-rs-cmd"
 version = "0.31.0"
 dependencies = [
- "defmt 0.3.100",
+ "defmt",
  "probe-rs-adi",
  "probe-rs-flash-nostd",
  "probe-rs-target-nostd",
@@ -3024,7 +3015,7 @@ dependencies = [
 name = "probe-rs-flash-nostd"
 version = "0.31.0"
 dependencies = [
- "defmt 0.3.100",
+ "defmt",
  "probe-rs-adi",
  "probe-rs-target-nostd",
 ]
@@ -3033,7 +3024,7 @@ dependencies = [
 name = "probe-rs-format"
 version = "0.31.0"
 dependencies = [
- "defmt 0.3.100",
+ "defmt",
 ]
 
 [[package]]
@@ -3062,7 +3053,7 @@ name = "probe-rs-target-nostd"
 version = "0.31.0"
 dependencies = [
  "base64",
- "defmt 0.3.100",
+ "defmt",
  "serde",
  "serde_yaml",
 ]
@@ -3151,7 +3142,7 @@ dependencies = [
 name = "probe-rs-wire"
 version = "0.31.0"
 dependencies = [
- "defmt 0.3.100",
+ "defmt",
  "embedded-hal",
 ]
 

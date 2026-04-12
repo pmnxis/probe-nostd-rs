@@ -14,7 +14,7 @@ rust-version = "1.95"
 
 [dependencies]
 probe-rs-wire = { path = "../probe-rs-wire" }
-defmt = { version = "0.3", optional = true }
+defmt = { version = "1.0", optional = true }
 
 [features]
 default = []

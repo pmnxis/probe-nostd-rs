@@ -15,7 +15,7 @@ probe-rs-wire = { path = "../probe-rs-wire" }
 probe-rs-adi = { path = "../probe-rs-adi" }
 probe-rs-flash-nostd = { path = "../probe-rs-flash-nostd" }
 probe-rs-target-nostd = { path = "../probe-rs-target-nostd" }
-defmt = { version = "0.3", optional = true }
+defmt = { version = "1.0", optional = true }
 
 [features]
 default = []
